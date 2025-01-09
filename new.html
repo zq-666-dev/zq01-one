@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生日祝福</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to right, #ffcccb, #add8e6);
+            color: #333;
+            padding: 50px;
+            margin: 0;
+            overflow: hidden; /* 防止滚动条出现 */
+        }
+
+        h1 {
+            color: #ff6f61;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: slideIn 1s forwards;
+            animation-delay: 0.5s;
+        }
+
+        .emoji {
+            font-size: 2rem;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 1s forwards;
+            animation-delay: 1.5s;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        /* 烟花画布样式 */
+        #fireworks {
+            position: fixed;  /* 使画布固定在窗口上 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 使鼠标事件穿透到下面的元素 */
+            z-index: -1; /* 将画布放在其他内容下方 */
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="emoji">🎉🎂TO：付玉    祝你生日快乐! 🎂🎉</h1>
+
+    <div class="message">
+        <p>今天是你的特别日子，首先我想要对你说一声：生日快乐！🎈</p>
+        <p>在这个充满欢笑和祝福的日子里，愿你拥有无尽的快乐与幸福！✨</p>
+        <p>希望在新的一岁里，你的每一个梦想都能成真，每一天都充满精彩的惊喜和美好的回忆。🌟</p>
+        <p>无论未来怎样，请记得有我一直支持你。❤️</p>
+        <p>祝你今天和接下来的一年，充满爱、欢笑和好运！🎊</p>
+        <p>享受这一天，尽情庆祝吧！</p>
+        <p>最好的祝福，</p>
+    </div>
+
+    <audio id="birthdayAudio" src="happy_birthday.mp3" autoplay></audio>
+
+    <footer>
+        <p>感谢您的光临，祝愿您每天都像今天一样快乐！🎊</p>
+    </footer>
+
+    <canvas id="fireworks"></canvas>
+
+    <script>
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        let fireworks = [];
+
+        class Firework {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 5 + 2; // 每个烟花的大小
+                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                this.speed = Math.random() * 3 + 2; // 每个烟花的速度
+                this.angle = Math.random() * Math.PI * 2; // 角度
+                this.dy = Math.sin(this.angle) * this.speed;
+                this.dx = Math.cos(this.angle) * this.speed;
+                this.exploded = false;
+                this.particles = [];
+            }
+
+            update() {
+                this.y -= this.dy; // 控制烟花上升
+                if (!this.exploded && this.size < 1) {
+                    this.explode();
+                }
+                if (this.exploded) {
+                    for (let particle of this.particles) {
+                        particle.update();
+                    }
+                }
+            }
+
+            explode() {
+                this.exploded = true;
+                for (let i = 0; i < 100; i++) {
+                    this.particles.push(new Particle(this.x, this.y, this.color));
+                }
+            }
+
+            draw() {
+                if (!this.exploded) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                    this.size *= 0.95; // 烟花逐渐消失
+                } else {
+                    for (let particle of this.particles) {
+                        particle.draw();
+                    }
+                }
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 2 + 1;
+                this.color = color;
+                this.speed = Math.random() * 2 + 1;
+                this.angle = Math.random() * Math.PI * 2;
+                this.dx = Math.cos(this.angle) * this.speed;
+                this.dy = Math.sin(this.angle) * this.speed;
+            }
+
+            update() {
+                this.x += this.dx;
+                this.y += this.dy;
+                this.size *= 0.97; // 粒子逐渐消失
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function createFirework() {
+            fireworks.push(new Firework(Math.random() * canvas.width, canvas.height));
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let firework of fireworks) {
+                firework.update();
+                firework.draw();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        setInterval(createFirework, 300); // 每300毫秒生成一个烟花
+        animate();
+    </script>
+
+</body>
+</html>
